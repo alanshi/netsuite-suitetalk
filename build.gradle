@@ -1,11 +1,23 @@
 plugins {
   id 'idea'
   id "no.nils.wsdl2java" version "0.10"
+  id 'net.researchgate.release' version '2.5.0'
+  id 'maven'
+  id 'signing'
 }
 
 task sourceJar(type: Jar) {
   classifier = 'sources'
   from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar) {
+  classifier = 'javadoc'
+  from javadoc
+}
+
+artifacts {
+  archives javadocJar, sourceJar
 }
 
 wsdl2java{
@@ -21,3 +33,53 @@ wsdl2java{
 wsdl2javaExt {
   deleteGeneratedSourcesOnClean = false
 }
+
+signing {
+  sign configurations.archives
+}
+
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+        authentication(userName: ossrhUsername, password: ossrhPassword)
+      }
+
+      snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+        authentication(userName: ossrhUsername, password: ossrhPassword)
+      }
+
+      pom.project {
+        name 'NetSuite SuiteTalk Library'
+        description 'Client API for NetSuite Suitetalk Web Services'
+        packaging 'jar'
+        url 'http://www.example.com/example-application'
+
+        scm {
+          connection 'git@github.com:bytekast/netsuite-suitetalk.git'
+          developerConnection 'git@github.com:bytekast/netsuite-suitetalk.git'
+          url 'https://github.com/bytekast/netsuite-suitetalk.git'
+        }
+
+        licenses {
+          license {
+            name 'The Apache License, Version 2.0'
+            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+          }
+        }
+
+        developers {
+          developer {
+            id 'bytekast'
+            name 'Rowell Belen'
+            email 'developer@bytekast.com'
+          }
+        }
+      }
+    }
+  }
+}
+
+afterReleaseBuild.finalizedBy(uploadArchives)
