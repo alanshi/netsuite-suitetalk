@@ -1,0 +1,12 @@
+sudo: required
+language: java
+jdk:
+  - oraclejdk8
+before_script:
+  - chmod +x gradlew
+install:
+  - echo "skip 'gradle assemble' step"
+script:
+  - ./gradlew -I init.gradle build publish --info
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

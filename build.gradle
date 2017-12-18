@@ -1,0 +1,23 @@
+plugins {
+  id 'idea'
+  id "no.nils.wsdl2java" version "0.10"
+}
+
+task sourceJar(type: Jar) {
+  classifier = 'sources'
+  from sourceSets.main.allSource
+}
+
+wsdl2java{
+  wsdlsToGenerate = [
+          ['-p','com.bytekast.netsuite.client', '-autoNameResolution', '-mark-generated',
+           '-xjc','-b', "$projectDir/src/main/resources/wsdl/bindings.xml",
+           "$projectDir/src/main/resources/wsdl/SuiteTalk.wsdl"]
+  ]
+  generatedWsdlDir = file("$projectDir/generatedsources")
+  wsdlDir = file("$projectDir/src/main/resources/wsdl")
+}
+
+wsdl2javaExt {
+  deleteGeneratedSourcesOnClean = false
+}
